@@ -1,41 +1,59 @@
 <?php
-  /**
-  * Requires the "PHP Email Form" library
-  * The "PHP Email Form" library is available only in the pro version of the template
-  * The library should be uploaded to: vendor/php-email-form/php-email-form.php
-  * For more info and help: https://bootstrapmade.com/php-email-form/
-  */
 
-  // Replace contact@example.com with your real receiving email address
-  $receiving_email_address = 'prabhaim95@example.com';
+// Replace this with your own email address
+$siteOwnersEmail = 'prabhaim95@gmail.com';
 
-  if( file_exists($php_email_form = '../assets/vendor/php-email-form/php-email-form.php' )) {
-    include( $php_email_form );
-  } else {
-    die( 'Unable to load the "PHP Email Form" Library!');
-  }
 
-  $contact = new PHP_Email_Form;
-  $contact->ajax = true;
-  
-  $contact->to = $receiving_email_address;
-  $contact->from_name = $_POST['name'];
-  $contact->from_email = $_POST['email'];
-  $contact->subject = $_POST['subject'];
+if($_POST) {
 
-  // Uncomment below code if you want to use SMTP to send emails. You need to enter your correct SMTP credentials
-  /*
-  $contact->smtp = array(
-    'host' => 'example.com',
-    'username' => 'example',
-    'password' => 'pass',
-    'port' => '587'
-  );
-  */
+   $name = trim(stripslashes($_POST['name']));
+   $email = trim(stripslashes($_POST['email']));
+   $subject = trim(stripslashes($_POST['subject']));
+   $message = trim(stripslashes($_POST['message']));
 
-  $contact->add_message( $_POST['name'], 'From');
-  $contact->add_message( $_POST['email'], 'Email');
-  $contact->add_message( $_POST['message'], 'Message', 10);
+   // Check Name
+	if (strlen($name) < 2) {
+		$error['name'] = "Please enter your name.";
+	}
+	// Check Email
+	if (!preg_match('/^[a-z0-9&\'\.\-_\+]+@[a-z0-9\-]+\.([a-z0-9\-]+\.)*+[a-z]{2}/is', $email)) {
+		$error['email'] = "Please enter a valid email address.";
+	}
+	// Check Message
+	if (strlen($message) < 1) {
+		$error['message'] = "Please enter your message. It should have at least 1 character.";
+	}
+   // Subject
+	if ($subject == '') { $subject = "Contact Form Submission"; }
 
-  echo $contact->send();
+
+   // Set Message
+   $message .= "Email from      : " . $name . "<br />";
+   $message .= "Email address   : " . $email . "<br />";
+   $message .= "Message         : " . $message . "<br />";
+ 
+   $message .= "<br /> ----- <br /> This email was sent from your Online Resume web site's contact form. <br />";
+
+   // Set From: header
+   $from =  $name . " <" . $email . ">";
+
+   // Email Headers
+	$headers = "From: " . $from . "\r\n";
+	$headers .= "Reply-To: ". $email . "\r\n";
+ 	$headers .= "MIME-Version: 1.0\r\n";
+	$headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+
+      $send = mail($siteOwnersEmail, $subject, $message, $headers);
+		if ($send) { echo 'Thank you for connecting me'; }
+     
+		
+	 # end if - no validation error
+
+	else {
+		echo 'error';
+
+	} # end if - there was a validation error
+
+}
+
 ?>
